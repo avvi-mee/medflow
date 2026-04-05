@@ -1,10 +1,18 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from config import settings
 
+# Ensure SQLite directory exists
+db_url = settings.database_url
+if "sqlite" in db_url:
+    db_path = db_url.replace("sqlite:///", "").replace("sqlite://", "")
+    db_dir = os.path.dirname(os.path.abspath(db_path)) if db_path else "."
+    os.makedirs(db_dir, exist_ok=True)
+
 engine = create_engine(
-    settings.database_url,
-    connect_args={"check_same_thread": False} if "sqlite" in settings.database_url else {},
+    db_url,
+    connect_args={"check_same_thread": False} if "sqlite" in db_url else {},
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
